@@ -51,6 +51,49 @@ using Pkg
 Pkg.update("LindoAPI")
 ```
 
+## Updating LINDO API
+
+When upgrading to a new version of LINDO API, the `LindoAPI.jl` package must be rebuilt to ensure compatibility with the latest interface.
+
+### Rebuild Steps
+```julia
+using Pkg
+Pkg.rm("LindoAPI")
+Pkg.add("LindoAPI")
+Pkg.build("LindoAPI")
+```
+
+### Version Verification
+Confirm that the Julia wrapper matches your installed LINDO API version:
+```julia
+import LindoAPI
+LindoAPI.LS_MAJOR
+LindoAPI.LS_MINOR
+```
+
+If the major and minor versions do **not** match your LINDO API install, proceed to clean and reinstall the package manually.
+
+---
+
+### Clean Manual Reinstall
+
+1. Remove the package:
+   ```julia
+   using Pkg
+   Pkg.rm("LindoAPI")
+   ```
+
+2. Remove cached build files:
+   ```bash
+   rm -rf /path/to/julia/packages/LindoAPI
+   ```
+
+3. Reinstall and rebuild:
+   ```julia
+   using Pkg
+   Pkg.add("LindoAPI")
+   Pkg.build("LindoAPI")
+   ```
 # Using the Soft Wrapper
 The [manual](https://www.lindo.com/downloads/PDF/API.pdf) has documentation on every function available, and plenty of samples all of which are straight forward to convert to Julia. For a quick start guide and to see how Julia works with the LINDO API this section will go through the steps that are important to getting started with the LINDO API.
 
