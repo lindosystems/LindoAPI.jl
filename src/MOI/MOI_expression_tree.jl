@@ -44,6 +44,10 @@ function get_pre_order(expr::Expr, instructionList, child_count_list)
                 push!(instructionList, :*)
                 push!(child_count_list , 0)
                 push!(instructionList, -1.0)
+            elseif child_count == 1 && expr.args[i] == :x
+                # if the expresion a single variable the :x symbol 
+                # is used and is not needed in the instruction list 
+                nothing
             elseif child_count <= 2
                 push!(child_count_list , child_count)
                 push!(instructionList, expr.args[i])
