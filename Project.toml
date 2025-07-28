@@ -1,6 +1,6 @@
 name = "LindoAPI"
 uuid = "5d56408f-8135-48b9-8e3b-17d984397714"
-version = "1.0.2"
+version = "1.0.3"
 repo = "https://github.com/lindosystems/LindoAPI.jl"
 
 [deps]
