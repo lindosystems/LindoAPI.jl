@@ -345,6 +345,10 @@ function LSloadNameData(pModel, pszTitle, pszObjName, pszRhsName, pszRngName, ps
     ccall((:LSloadNameData, liblindo), Cint, (pLSmodel, Ptr{Cchar}, Ptr{Cchar}, Ptr{Cchar}, Ptr{Cchar}, Ptr{Cchar}, Ptr{Ptr{Cchar}}, Ptr{Ptr{Cchar}}, Ptr{Ptr{Cchar}}), pModel, pszTitle, pszObjName, pszRhsName, pszRngName, pszBndname, paszConNames, paszVarNames, paszConeNames)
 end
 
+function LSloadIndData(pModel, nIndicRows, paiIndicRows, paiIndicCols, paiIndicVals)
+    ccall((:LSloadIndData, liblindo), Cint, (pLSmodel, Cint, Ptr{Cint}, Ptr{Cint}, Ptr{Cint}), pModel, nIndicRows, paiIndicRows, paiIndicCols, paiIndicVals)
+end
+
 function LSloadNLPData(pModel, paiNLPcols, panNLPcols, padNLPcoef, paiNLProws, nNLPobj, paiNLPobj, padNLPobj)
     ccall((:LSloadNLPData, liblindo), Cint, (pLSmodel, Ptr{Cint}, Ptr{Cint}, Ptr{Cdouble}, Ptr{Cint}, Cint, Ptr{Cint}, Ptr{Cdouble}), pModel, paiNLPcols, panNLPcols, padNLPcoef, paiNLProws, nNLPobj, paiNLPobj, padNLPobj)
 end
@@ -359,6 +363,10 @@ end
 
 function LSaddInstruct(pModel, nCons, nObjs, nVars, nNumbers, panObjSense, pszConType, pszVarType, panInstruct, nInstruct, paiCons, padNumVal, padVarVal, paiObjBeg, panObjLen, paiConBeg, panConLen, padLB, padUB)
     ccall((:LSaddInstruct, liblindo), Cint, (pLSmodel, Cint, Cint, Cint, Cint, Ptr{Cint}, Ptr{Cchar}, Ptr{Cchar}, Ptr{Cint}, Cint, Ptr{Cint}, Ptr{Cdouble}, Ptr{Cdouble}, Ptr{Cint}, Ptr{Cint}, Ptr{Cint}, Ptr{Cint}, Ptr{Cdouble}, Ptr{Cdouble}), pModel, nCons, nObjs, nVars, nNumbers, panObjSense, pszConType, pszVarType, panInstruct, nInstruct, paiCons, padNumVal, padVarVal, paiObjBeg, panObjLen, paiConBeg, panConLen, padLB, padUB)
+end
+
+function LSloadAdjVars(pModel, nCols, paiCols, padPrimal)
+    ccall((:LSloadAdjVars, liblindo), Cint, (pLSmodel, Cint, Ptr{Cint}, Ptr{Cdouble}), pModel, nCols, paiCols, padPrimal)
 end
 
 function LSloadStringData(pModel, nStrings, paszStringData)
@@ -529,6 +537,14 @@ function LSgetInfo(pModel, nQuery, pvResult)
     ccall((:LSgetInfo, liblindo), Cint, (pLSmodel, Cint, Ptr{Cvoid}), pModel, nQuery, pvResult)
 end
 
+function LSgetIntInfo(pModel, nQuery, pnResult)
+    ccall((:LSgetIntInfo, liblindo), Cint, (pLSmodel, Cint, Ptr{Cint}), pModel, nQuery, pnResult)
+end
+
+function LSgetDouInfo(pModel, nQuery, pdResult)
+    ccall((:LSgetDouInfo, liblindo), Cint, (pLSmodel, Cint, Ptr{Cdouble}), pModel, nQuery, pdResult)
+end
+
 function LSgetProfilerInfo(pModel, mContext, pnCalls, pdElapsedTime)
     ccall((:LSgetProfilerInfo, liblindo), Cint, (pLSmodel, Cint, Ptr{Cint}, Ptr{Cdouble}), pModel, mContext, pnCalls, pdElapsedTime)
 end
@@ -543,6 +559,10 @@ end
 
 function LSgetDualSolution(pModel, padDual)
     ccall((:LSgetDualSolution, liblindo), Cint, (pLSmodel, Ptr{Cdouble}), pModel, padDual)
+end
+
+function LSgetSDPSolution(pModel, padSDPPrimal, padSDPDual)
+    ccall((:LSgetSDPSolution, liblindo), Cint, (pLSmodel, Ptr{Cdouble}, Ptr{Cdouble}), pModel, padSDPPrimal, padSDPDual)
 end
 
 function LSgetReducedCosts(pModel, padRedcosts)
@@ -587,6 +607,10 @@ end
 
 function LSgetMIPBasis(pModel, panCstatus, panRstatus)
     ccall((:LSgetMIPBasis, liblindo), Cint, (pLSmodel, Ptr{Cint}, Ptr{Cint}), pModel, panCstatus, panRstatus)
+end
+
+function LSgetMIPSDPSolution(pModel, padSDPPrimal, padSDPDual)
+    ccall((:LSgetMIPSDPSolution, liblindo), Cint, (pLSmodel, Ptr{Cdouble}, Ptr{Cdouble}), pModel, padSDPPrimal, padSDPDual)
 end
 
 function LSgetNextBestMIPSol(pModel, pnIntModStatus)
@@ -733,8 +757,8 @@ function LScalinfeasMIPsolution(pModel, pdIntPfeas, pbConsPfeas, padPrimalMipsol
     ccall((:LScalinfeasMIPsolution, liblindo), Cint, (pLSmodel, Ptr{Cdouble}, Ptr{Cdouble}, Ptr{Cdouble}), pModel, pdIntPfeas, pbConsPfeas, padPrimalMipsol)
 end
 
-function LSgetRoundMIPsolution(pModel, padPrimal, padPrimalRound, pdObjRound, pdPfeasRound, pnstatus, iUseOpti)
-    ccall((:LSgetRoundMIPsolution, liblindo), Cint, (pLSmodel, Ptr{Cdouble}, Ptr{Cdouble}, Ptr{Cdouble}, Ptr{Cdouble}, Ptr{Cint}, Cint), pModel, padPrimal, padPrimalRound, pdObjRound, pdPfeasRound, pnstatus, iUseOpti)
+function LSgetRoundMIPsolution(pModel, padPrimal, padPrimalRound, pdObjRound, pdPfeasRound, pnstatus, iUseOpti, callerFunc)
+    ccall((:LSgetRoundMIPsolution, liblindo), Cint, (pLSmodel, Ptr{Cdouble}, Ptr{Cdouble}, Ptr{Cdouble}, Ptr{Cdouble}, Ptr{Cint}, Cint, Cint), pModel, padPrimal, padPrimalRound, pdObjRound, pdPfeasRound, pnstatus, iUseOpti, callerFunc)
 end
 
 function LSgetDuplicateColumns(pModel, nCheckVals, pnSets, paiSetsBeg, paiCols)
@@ -795,6 +819,10 @@ end
 
 function LSdeleteQCterms(pModel, nCons, paiCons)
     ccall((:LSdeleteQCterms, liblindo), Cint, (pLSmodel, Cint, Ptr{Cint}), pModel, nCons, paiCons)
+end
+
+function LSdeleteIndConstraints(pModel, nCons, paiCons)
+    ccall((:LSdeleteIndConstraints, liblindo), Cint, (pLSmodel, Cint, Ptr{Cint}), pModel, nCons, paiCons)
 end
 
 function LSdeleteAj(pModel, iVar1, nRows, paiRows)
@@ -987,6 +1015,10 @@ end
 
 function LSgetProgressInfo(pModel, nLocation, nQuery, pvValue)
     ccall((:LSgetProgressInfo, liblindo), Cint, (pLSmodel, Cint, Cint, Ptr{Cvoid}), pModel, nLocation, nQuery, pvValue)
+end
+
+function LSgetProgressInfoSafe(pModel, nLocation, nQuery, pvValue)
+    ccall((:LSgetProgressInfoSafe, liblindo), Cint, (pLSmodel, Cint, Cint, Ptr{Cvoid}), pModel, nLocation, nQuery, pvValue)
 end
 
 function LSsetUsercalc(pModel, pfUser_func, pvUserData)
@@ -1797,6 +1829,10 @@ function LSdisplayTunerResults(pEnv)
     ccall((:LSdisplayTunerResults, liblindo), Cint, (pLSenv,), pEnv)
 end
 
+function LSgetTaboxEnv(pEnv)
+    ccall((:LSgetTaboxEnv, liblindo), Ptr{Cvoid}, (pLSenv,), pEnv)
+end
+
 function LSgetLicenseInfo(pModel, pnMaxcons, pnMaxs, pnMaxints, pnReserved1, pnDaystoexp, pnDaystotrialexp, pnNlpAllowed, pnUsers, pnBarAllowed, pnRuntime, pnEdulicense, pachText)
     ccall((:LSgetLicenseInfo, liblindo), Cint, (pLSmodel, Ptr{Cint}, Ptr{Cint}, Ptr{Cint}, Ptr{Cint}, Ptr{Cint}, Ptr{Cint}, Ptr{Cint}, Ptr{Cint}, Ptr{Cint}, Ptr{Cint}, Ptr{Cint}, Ptr{Cchar}), pModel, pnMaxcons, pnMaxs, pnMaxints, pnReserved1, pnDaystoexp, pnDaystotrialexp, pnNlpAllowed, pnUsers, pnBarAllowed, pnRuntime, pnEdulicense, pachText)
 end
@@ -1847,6 +1883,22 @@ end
 
 function LSgetCLOptInd(pEnv, pnOptInd)
     ccall((:LSgetCLOptInd, liblindo), Cint, (pLSenv, Ptr{Cint}), pEnv, pnOptInd)
+end
+
+function LSsetCLOptKVd(pEnv, szKey, dVal)
+    ccall((:LSsetCLOptKVd, liblindo), Cint, (pLSenv, Ptr{Cchar}, Cdouble), pEnv, szKey, dVal)
+end
+
+function LSgetCLOptKVd(pEnv, szKey)
+    ccall((:LSgetCLOptKVd, liblindo), Cdouble, (pLSenv, Ptr{Cchar}), pEnv, szKey)
+end
+
+function LSsetCLOptKVsz(pEnv, szKey, szVal)
+    ccall((:LSsetCLOptKVsz, liblindo), Cint, (pLSenv, Ptr{Cchar}, Ptr{Cchar}), pEnv, szKey, szVal)
+end
+
+function LSgetCLOptKVsz(pEnv, szKey)
+    ccall((:LSgetCLOptKVsz, liblindo), Ptr{Cchar}, (pLSenv, Ptr{Cchar}), pEnv, szKey)
 end
 
 function LSsolveExternally(pModel, mSolver, nMethod, nFileFormat, pnStatus)
