@@ -39,6 +39,10 @@ Or in julia
 ENV["LINDOAPI_HOME"] = "/opt/LindoAPI"
 ```
 
+### Platforms
+When the package is built, `deps/build.jl` picks the library in the `bin/` subdirectory of `LINDOAPI_HOME` that matches the operating system and the processor Julia runs on: `win64`, `win64arm`, `win32`, `linux64`, `linux64arm`, `osx64x86` or `osx64arm`.
+An x86_64 Julia running under emulation (Rosetta 2 on Apple silicon, x64 emulation on Windows on ARM) uses the x86_64 library.
+
 To add the package in Julia
 ```julia
 using Pkg

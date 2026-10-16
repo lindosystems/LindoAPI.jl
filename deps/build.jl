@@ -70,8 +70,37 @@ end
 
 #=
 
+ Function platform:
+ Brief: Name of the LINDO API bin/ subdirectory for the operating system
+        and processor this Julia runs on. Sys.ARCH is Julia's own
+        architecture, so an x86_64 Julia running under emulation (Rosetta 2,
+        Windows on ARM) gets the x86_64 library it is able to load.
+
+ Return: "win64", "win64arm", "win32", "linux64", "linux64arm", "linux32",
+         "osx64x86", "osx64arm", or "" if LINDO API has no build for it.
+
+=#
+function platform()
+    if Sys.iswindows()
+        Sys.ARCH == :x86_64  && return "win64"
+        Sys.ARCH == :aarch64 && return "win64arm"
+        Sys.ARCH == :i686    && return "win32"
+    elseif Sys.islinux()
+        Sys.ARCH == :x86_64  && return "linux64"
+        Sys.ARCH == :aarch64 && return "linux64arm"
+        Sys.ARCH == :i686    && return "linux32"
+    elseif Sys.isapple()
+        Sys.ARCH == :x86_64  && return "osx64x86"
+        Sys.ARCH == :aarch64 && return "osx64arm"
+    end
+    return ""
+end
+
+#=
+
  Function library:
- Breif: Gets Full path to the Lindo API which depends on the Operating system.
+ Breif: Gets Full path to the Lindo API which depends on the Operating system
+        and the processor.
 
  Return liblindo: path to the Lindo API
 
@@ -82,32 +111,28 @@ function library()
         PATH = ENV["LINDOAPI_HOME"]
     else
         PATH = ""
-            @warn "Environment variable LINDOAPI_HOME is empty.  
+            @warn "Environment variable LINDOAPI_HOME is empty.
                    Please set LINDOAPI_HOME to the root of your LINDO API directory and reinstall this package. "
     end
     LS_MAJOR, LS_MINOR = ls_get_version(joinpath(PATH, "include/lsversion.sh"))
+    PLATFORM = platform()
     if LS_MAJOR == 0 && LS_MINOR == 0
         liblindo = ""
+    elseif PLATFORM == ""
+        error("LINDO API is not available for $(Sys.KERNEL) on $(Sys.ARCH)")
     elseif Sys.iswindows()
+        # lindo64_<major>_<minor> on win64 and win64arm, lindo<major>_<minor> on win32
         if is_64bits
-            liblindo = joinpath(PATH,"bin/win64/lindo64_"*LS_MAJOR*"_"*LS_MINOR)
+            liblindo = joinpath(PATH,"bin/"*PLATFORM*"/lindo64_"*LS_MAJOR*"_"*LS_MINOR)
         else
-            liblindo = joinpath(PATH,"bin/win32/lindo"*LS_MAJOR*"_"*LS_MINOR)
-        end
-    elseif Sys.islinux()
-        if is_64bits
-            liblindo = joinpath(PATH,"bin/linux64/liblindo64")
-        else
-            liblindo = joinpath(PATH,"bin/linux32/liblindo")
-        end
-    elseif Sys.isapple()
-        if is_64bits
-            liblindo = joinpath(PATH,"bin/osx64x86/liblindo64")
-        else
-            liblindo = joinpath(PATH,"bin/osx32x86/liblindo")
+            liblindo = joinpath(PATH,"bin/"*PLATFORM*"/lindo"*LS_MAJOR*"_"*LS_MINOR)
         end
     else
-        error("Operating system not Windows, Mac OS, or Linux")#get_error_message_if_not_found()
+        if is_64bits
+            liblindo = joinpath(PATH,"bin/"*PLATFORM*"/liblindo64")
+        else
+            liblindo = joinpath(PATH,"bin/"*PLATFORM*"/liblindo")
+        end
     end
     return liblindo, LS_MAJOR, LS_MINOR
 end
@@ -143,7 +168,7 @@ function try_installation()
     if check_library(liblindo)
         @info "Found API location `$(liblindo)`"
     else
-        @warn "Lindo API not found. Please install the Lindo API and reinstall this package."
+        @warn "Lindo API not found at `$(liblindo)`. Please install the Lindo API and reinstall this package."
     end
     write_depsfile(liblindo, LS_MAJOR, LS_MINOR)
 end
